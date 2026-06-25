@@ -19,6 +19,20 @@ const HN=[
 ]
 
 const SOURCE_LABEL={'xem_gio':'Xem Giờ','boc_bai':'Bốc Bài','bien_so':'Biển Số','so_dt':'Số ĐT'}
+const SOURCE_FILTER=[
+  {key:'all',label:'Tất Cả',icon:'☯'},
+  {key:'xem_gio',label:'Xem Giờ',icon:'🕐'},
+  {key:'boc_bai',label:'Bốc Bài',icon:'🃏'},
+  {key:'so_dt',label:'Số ĐT',icon:'📱'},
+  {key:'bien_so',label:'Biển Số',icon:'🚗'},
+]
+const EMPTY_MSG={
+  all:'Chưa có quẻ nào được lưu',
+  xem_gio:'Chưa có quẻ xem giờ nào',
+  boc_bai:'Chưa có quẻ bốc bài nào',
+  so_dt:'Chưa có quẻ số điện thoại nào',
+  bien_so:'Chưa có quẻ biển số nào',
+}
 
 function CardBadge({str}){
   const isRed=str.includes('♥')||str.includes('♦')
@@ -45,13 +59,6 @@ function SourceDataDisplay({source,data}){
   }
   return<span>{data}</span>
 }
-const SOURCE_FILTER=[
-  {key:'all',label:'Tất cả'},
-  {key:'xem_gio',label:'Xem Giờ'},
-  {key:'boc_bai',label:'Bốc Bài'},
-  {key:'bien_so',label:'Biển Số'},
-  {key:'so_dt',label:'Số ĐT'},
-]
 
 // ─── Theme ─────────────────────────────────────────────────────────────────────
 function autoThemeVal(){ const h=new Date().getHours(); return h>=6&&h<18?'light':'dark' }
@@ -188,27 +195,40 @@ export default function LichSuApp({savedQues,user}){
           <div style={{color:'var(--text3)',fontSize:'11px',marginTop:'4px'}}>{ques.length} quẻ đã lưu</div>
         </div>
 
-        {/* Filter */}
-        <div style={{display:'flex',gap:'6px',marginBottom:'16px',flexWrap:'wrap'}}>
-          {SOURCE_FILTER.map(f=>(
-            <button key={f.key}
-              onClick={()=>setFilter(f.key)}
-              style={{
-                padding:'6px 14px',borderRadius:'20px',fontSize:'12px',cursor:'pointer',letterSpacing:'1px',transition:'all 0.15s',
-                border:filter===f.key?'1px solid var(--gold-dark)':'1px solid var(--border)',
-                background:filter===f.key?'var(--bg3)':'transparent',
-                color:filter===f.key?'var(--gold-light)':'var(--text3)',
-              }}>
-              {f.label}
-            </button>
-          ))}
+        {/* Tabs */}
+        <div style={{display:'flex',overflowX:'auto',gap:'0',marginBottom:'20px',borderBottom:'1px solid var(--border)',scrollbarWidth:'none'}}>
+          {SOURCE_FILTER.map(f=>{
+            const count=f.key==='all'?ques.length:ques.filter(q=>q.source===f.key).length
+            const active=filter===f.key
+            return(
+              <button key={f.key} onClick={()=>setFilter(f.key)}
+                style={{
+                  flexShrink:0,padding:'10px 14px',fontSize:'12px',cursor:'pointer',letterSpacing:'0.5px',
+                  border:'none',borderBottom:active?'2px solid var(--gold)':'2px solid transparent',
+                  background:'transparent',color:active?'var(--gold-light)':'var(--text3)',
+                  fontWeight:active?'700':'400',transition:'all 0.15s',whiteSpace:'nowrap',
+                  display:'flex',alignItems:'center',gap:'5px',
+                }}>
+                <span>{f.icon}</span>
+                <span>{f.label}</span>
+                {count>0&&(
+                  <span style={{
+                    background:active?'var(--gold-dark)':'var(--bg3)',
+                    color:active?'#000':'var(--text3)',
+                    borderRadius:'10px',fontSize:'10px',fontWeight:'700',
+                    padding:'1px 6px',minWidth:'18px',textAlign:'center',
+                  }}>{count}</span>
+                )}
+              </button>
+            )
+          })}
         </div>
 
         {/* List */}
         {filtered.length===0?(
           <div style={{textAlign:'center',color:'var(--text3)',padding:'60px 20px'}}>
             <div style={{fontSize:'32px',marginBottom:'12px'}}>☯</div>
-            <div style={{fontSize:'14px'}}>Chưa có quẻ nào</div>
+            <div style={{fontSize:'14px'}}>{EMPTY_MSG[filter]||'Chưa có quẻ nào'}</div>
             <Link href="/xem-que" style={{color:'var(--gold-dark)',fontSize:'13px',textDecoration:'none',display:'inline-block',marginTop:'12px'}}>Xem quẻ →</Link>
           </div>
         ):(
