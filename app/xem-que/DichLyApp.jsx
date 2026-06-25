@@ -602,15 +602,30 @@ function parseSdtNums(raw){
   const digits=raw.replace(/\D/g,'').split('').map(Number);if(digits.length<10)return null
   const d=digits.slice(0,10);return{left:d.slice(0,4),right:d.slice(4,10),raw}
 }
+function padSdtLeft(zeros){
+  const input=document.getElementById('sdt-input')
+  const digits=input.value.replace(/\D/g,'')
+  input.value='0'.repeat(zeros)+digits
+  onSdtInput(input.value)
+}
 function onSdtInput(val){
   const p=parseSdtNums(val),hint=document.getElementById('sdt-hint')
-  if(!p){const n=val.replace(/\D/g,'').length;hint.innerHTML=`<span style="color:var(--text3)">Đã nhập ${n}/10 số</span>`;return}
+  if(!p){
+    const n=val.replace(/\D/g,'').length,missing=10-n
+    if(n>=8&&n<=9){
+      const prefix='0'.repeat(missing)
+      hint.innerHTML=`<span style="color:var(--text3)">Đã nhập ${n}/10 số</span> · <span style="color:var(--gold-dark);cursor:pointer;text-decoration:underline;font-size:11px" onclick="window._w.padSdtLeft(${missing})">Thêm ${prefix} vào đầu →</span>`
+    }else{
+      hint.innerHTML=`<span style="color:var(--text3)">Đã nhập ${n}/10 số</span>`
+    }
+    return
+  }
   const tien=sumMod8(p.left),hau=sumMod8(p.right),hao=sumMod6([...p.left,...p.right])
   hint.innerHTML=`<span style="color:var(--gold)">${p.left.join('')}</span> · <span style="color:var(--gold)">${p.right.join('')}</span> &nbsp;→&nbsp; Tiên <strong>${BAGUA[tien].n}</strong> · Hậu <strong>${BAGUA[hau].n}</strong> · Hào <span style="color:var(--red)">${hao}</span> động`
 }
 function calcSdt(){
   const raw=document.getElementById('sdt-input').value,p=parseSdtNums(raw)
-  if(!p){alert('Vui lòng nhập đủ 10 chữ số!');return}
+  if(!p){document.getElementById('sdt-hint').innerHTML=`<span style="color:var(--red)">Vui lòng nhập đủ 10 chữ số!</span>`;return}
   const tien=sumMod8(p.left),hau=sumMod8(p.right),hao=sumMod6([...p.left,...p.right])
   const bt=BAGUA[tien],bh=BAGUA[hau],allVals=[...p.left,...p.right]
   const tSum=p.left.reduce((a,b)=>a+b,0),hSum=p.right.reduce((a,b)=>a+b,0)
@@ -855,7 +870,7 @@ export default function DichLyApp() {
     window._w = {
       calSelectDay, calNavYear, calNavMonth, calPickMonth, calPickYear,
       calNavYearGroup, calToggleEvtPanel, calAddEvent, calDeleteEvent,
-      selectGio, showHistItem, showBsxHist, delBsxHist, showSdtHist, delSdtHist,
+      selectGio, showHistItem, showBsxHist, delBsxHist, showSdtHist, delSdtHist, padSdtLeft,
     }
     // Callback for save feature
     window.__dichly_setQue = setQueResult
