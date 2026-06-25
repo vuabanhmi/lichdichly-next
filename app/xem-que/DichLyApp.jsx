@@ -400,7 +400,6 @@ function onCardsScroll(el){
   el.querySelectorAll('.cards-dot').forEach((d,i)=>d.classList.toggle('active',i===idx))
 }
 function doCalc(shouldAutoSave=false){
-  _uid=0
   const vn=liveMode?getVN():getPickerVN()
   const r=calc(vn)
   const si=document.getElementById('sel-info')
@@ -574,7 +573,6 @@ function calcBsx(){
   if(window.__dichly_autoSave)window.__dichly_autoSave({queName:HN[tien-1][hau-1],hao,trigUp:tien,trigLo:hau,source:'bien_so',sourceData:{input:plate}})
 }
 function calcAndRender(up,lo,hao,cardsId,dotsId,resultId,summaryHtml){
-  _uid=0
   const L6=[...TL[lo],...TL[up]]
   const hoL=l2t(L6[1],L6[2],L6[3]),hoU=l2t(L6[2],L6[3],L6[4])
   const B6=[...L6];B6[hao-1]=B6[hao-1]===1?0:1
@@ -877,6 +875,18 @@ export default function DichLyApp() {
         setUser(u)
         window.__dichly_autoSave = (data) => autoSaveQue(data).catch(() => {})
 
+        // Khôi phục quẻ đang xem trước khi đăng nhập
+        try {
+          const pending = localStorage.getItem('pendingQueResult')
+          if (pending) {
+            localStorage.removeItem('pendingQueResult')
+            const pendingQue = JSON.parse(pending)
+            setQueResult(pendingQue)
+            setShowModal(true)
+          }
+        } catch {}
+
+
         getAnniversaries().then(items => {
           calEvents = items
           renderEvtList?.()
@@ -943,7 +953,14 @@ export default function DichLyApp() {
 
       {/* Save FAB — appears after a hexagram is calculated */}
       {queResult && (
-        <button className="save-que-fab" onClick={() => user ? setShowModal(true) : setShowLoginModal(true)}>
+        <button className="save-que-fab" onClick={() => {
+          if (user) {
+            setShowModal(true)
+          } else {
+            localStorage.setItem('pendingQueResult', JSON.stringify(queResult))
+            setShowLoginModal(true)
+          }
+        }}>
           💾 Lưu Quẻ
         </button>
       )}
