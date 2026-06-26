@@ -18,6 +18,15 @@ export const metadata: Metadata = {
     template: "%s | Dịch Lý Việt Nam",
   },
   description: "Lịch âm dương, xem quẻ Kinh Dịch theo giờ, bốc quẻ bài Tây",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Dịch Lý",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export default function RootLayout({
